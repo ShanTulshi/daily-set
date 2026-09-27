@@ -1,75 +1,44 @@
-# React + TypeScript + Vite
+# Daily Set
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A daily puzzle based on the card game [Set](https://en.wikipedia.org/wiki/Set_(card_game)), live at **[set.shan.wtf](https://set.shan.wtf)**.
 
-Currently, two official plugins are available:
+Every day has one puzzle: 12 cards that contain exactly four Sets, with no card shared between them and no other Sets hiding among the cards. Find all four. Your time and wrong guesses are shown when you finish.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## How it works
 
-## React Compiler
+Each card is a vector in Z₃⁴: number, shape, shading and color, each 0, 1 or 2. Three cards form a Set when every coordinate sums to 0 mod 3, i.e. each attribute is all the same or all different. Any two cards have exactly one card that completes a Set with them: `c = −a − b (mod 3)`.
 
-The React Compiler is enabled on this template. See [this documentation](https://react.dev/learn/react-compiler) for more information.
+The generator (`src/puzzle/`) is plain TypeScript with no UI dependencies:
 
-Note: This will impact Vite dev & build performances.
+1. Seed a PRNG from the date (`2026-09-27` → `20260927`), so every player gets the same puzzle.
+2. Pick four disjoint Sets at random: two unused cards plus the card that completes them.
+3. Find every Set among the 12 cards by completing each pair. Keep the candidate only if the four chosen Sets are the only ones, otherwise try again (about 1 in 5 candidates passes; generation takes well under a millisecond).
+4. Check the result against the full invariant (`assertValidPuzzle`) before returning it.
 
-## Expanding the ESLint configuration
+The puzzle itself is fixed per date. The on-screen card order is shuffled separately from a per-player seed, so layouts differ between players but stay the same across reloads.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Progress (found Sets, misses, start and solve time, layout seed) is kept in `localStorage` for the current day only. That stops casual retries, but it isn't tamper-proof.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+> Changing the generator changes the puzzle for every date, past and future.
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+## Development
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev     # dev server at http://localhost:5173
+npm test        # generator tests (Node's built-in test runner)
+npm run lint
+npm run build   # type-check and build to dist/
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+| Path | Contents |
+|---|---|
+| `src/puzzle/card.ts` | Card representation, Set check, Set completion, `findSets` |
+| `src/puzzle/puzzle.ts` | Daily generator, validation, display shuffle, PRNG |
+| `src/App.tsx` | Game UI, timer, saved progress |
+| `static/set_cards_individual/` | Black-and-white card SVGs, tinted by color in CSS |
+| `tests/` | Generator tests |
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Deployment
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+Every push to `main` runs lint, tests and the build, then deploys `dist/` to GitHub Pages (`.github/workflows/deploy.yml`). The custom domain `set.shan.wtf` is set in the repo's Pages settings and proxied through Cloudflare, which handles HTTPS.
