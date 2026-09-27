@@ -39,6 +39,7 @@ npm run build   # type-check and build to dist/
 | `src/puzzle/puzzle.ts` | Daily generator, validation, display shuffle, PRNG |
 | `src/App.tsx` | Game UI, timer, saved progress |
 | `static/set_cards_individual/` | Black-and-white card SVGs, tinted by color in CSS |
+| `scripts/draw-cards.ts` | Draws those SVGs: `node scripts/draw-cards.ts` |
 | `tests/` | Generator tests |
 
 ## Deployment

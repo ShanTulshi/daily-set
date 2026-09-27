@@ -1,10 +1,10 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="130" height="150" viewBox="0 0 130 150">
 <defs>
-<pattern id="stripes" patternUnits="userSpaceOnUse" width="6" height="6">
-<line x1="0" y1="0" x2="0" y2="6" stroke="black" stroke-width="2"/>
+<pattern id="stripes" patternUnits="userSpaceOnUse" width="6" height="5">
+<line x1="0" y1="2.5" x2="6" y2="2.5" stroke="black" stroke-width="1.5"/>
 </pattern>
 </defs>
 <rect x="1" y="1" width="128" height="148" rx="10" fill="white" stroke="black"/>
-<path d="M 65.0 41.0 L 95.0 53.0 L 65.0 65.0 L 35.0 53.0 Z" fill="white" stroke="black" stroke-width="2"/>
-<path d="M 65.0 85.0 L 95.0 97.0 L 65.0 109.0 L 35.0 97.0 Z" fill="white" stroke="black" stroke-width="2"/>
+<path d="M 45 39 L 60 75 L 45 111 L 30 75 Z" fill="white" stroke="black" stroke-width="3.5" stroke-linejoin="round"/>
+<path d="M 85 39 L 100 75 L 85 111 L 70 75 Z" fill="white" stroke="black" stroke-width="3.5" stroke-linejoin="round"/>
 </svg>
