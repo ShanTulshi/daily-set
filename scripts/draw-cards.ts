@@ -73,3 +73,16 @@ ${paths.join('\n')}
     }
   }
 }
+
+// Favicon: the three shapes fanned out over each other, overlaps mixing like ink.
+const FAN = [
+  { draw: diamond, color: '#1f9d3a', angle: -32 },
+  { draw: squiggle, color: '#6a3d9a', angle: 0 },
+  { draw: pill, color: '#d62828', angle: 32 },
+]
+const favicon = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+<rect width="100" height="100" rx="22" fill="white"/>
+${FAN.map(({ draw, color, angle }) => `<path d="${draw(50, 50)}" fill="${color}" transform="rotate(${angle} 50 50)" style="mix-blend-mode:multiply"/>`).join('\n')}
+</svg>
+`
+writeFileSync(new URL('../public/favicon.svg', import.meta.url), favicon)
