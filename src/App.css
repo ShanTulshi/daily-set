@@ -88,3 +88,18 @@ header p,
   font-variant-numeric: tabular-nums;
   color: var(--text);
 }
+
+.help {
+  margin-top: 24px;
+  text-align: left;
+  color: var(--muted);
+}
+
+.help summary {
+  cursor: pointer;
+  text-align: center;
+}
+
+.help a {
+  color: var(--accent);
+}

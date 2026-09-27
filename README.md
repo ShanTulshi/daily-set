@@ -4,6 +4,8 @@ A daily puzzle based on the card game [Set](https://en.wikipedia.org/wiki/Set_(c
 
 Every day has one puzzle: 12 cards that contain exactly four Sets, with no card shared between them and no other Sets hiding among the cards. Find all four. Your time and wrong guesses are shown when you finish.
 
+New to Set? [Wikipedia](https://en.wikipedia.org/wiki/Set_(card_game)) explains the game and its rules.
+
 ## How it works
 
 Each card is a vector in Z₃⁴: number, shape, shading and color, each 0, 1 or 2. Three cards form a Set when every coordinate sums to 0 mod 3, i.e. each attribute is all the same or all different. Any two cards have exactly one card that completes a Set with them: `c = −a − b (mod 3)`.

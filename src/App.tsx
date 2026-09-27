@@ -180,6 +180,23 @@ export default function App() {
           </>
         )}
       </p>
+
+      <details className="help">
+        <summary>Help</summary>
+        <p>
+          Every card has four features: number, shape, shading and color. Three cards form a
+          Set when each feature is either the same on all three cards or different on all three.
+        </p>
+        <p>
+          These 12 cards hold exactly four Sets, and each card belongs to exactly one of them.
+          Tap three cards to guess a Set. Find all four to finish.
+        </p>
+        <p>
+          <a href="https://en.wikipedia.org/wiki/Set_(card_game)" target="_blank" rel="noreferrer">
+            Learn more about Set on Wikipedia
+          </a>
+        </p>
+      </details>
     </main>
   )
 }
