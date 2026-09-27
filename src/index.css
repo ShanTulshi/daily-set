@@ -2,6 +2,8 @@
   --text: #1c1b22;
   --muted: #6b6375;
   --bg: #f4f3ef;
+  --surface: #fff;
+  --border: #e2e0da;
   --accent: #6a3d9a;
   --red: #d62828;
   --green: #1f9d3a;
@@ -19,6 +21,8 @@
     --text: #f3f4f6;
     --muted: #9ca3af;
     --bg: #16171d;
+    --surface: #1f2028;
+    --border: #2e303a;
     --accent: #c084fc;
   }
 }
