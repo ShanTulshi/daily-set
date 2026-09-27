@@ -36,6 +36,16 @@ header p,
   outline-offset: 2px;
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: opacity 200ms;
+  }
+
+  .card[aria-pressed='true'] {
+    transform: none;
+  }
+}
+
 .card:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 2px;
@@ -71,3 +81,10 @@ header p,
 .card-face[data-color='red'] { --tint: var(--red); }
 .card-face[data-color='green'] { --tint: var(--green); }
 .card-face[data-color='purple'] { --tint: var(--purple); }
+
+.time {
+  display: block;
+  font-size: 2.5rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
