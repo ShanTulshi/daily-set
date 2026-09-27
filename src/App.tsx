@@ -6,8 +6,10 @@ import {
   NUMBERS,
   SHADINGS,
   SHAPES,
+  cardToIndex,
   dateKey,
   generatePuzzle,
+  mulberry32,
   shufflePuzzle,
 } from './puzzle/index.ts'
 import './App.css'
@@ -53,20 +55,65 @@ function formatTime(elapsed: number): string {
   return `${minutes}:${seconds.padStart(6, '0')}`
 }
 
+/** Today's progress. Only the latest date is kept, so old days don't accumulate. */
+interface Progress {
+  date: string
+  layoutSeed: number // this player's card order
+  startedAt: number // epoch ms
+  found: number[] // cardToIndex of every card in a found Set
+  misses: number
+  solveTime: number | null // ms
+}
+
+const STORAGE_KEY = 'daily-set'
+
+function loadProgress(date: string): Progress | null {
+  try {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? 'null')
+    return saved?.date === date ? saved : null
+  } catch {
+    return null
+  }
+}
+
+function saveProgress(progress: Progress) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress))
+  } catch {
+    // Storage unavailable (e.g. blocked): the game still works, it just isn't kept.
+  }
+}
+
+function loadGame() {
+  const date = dateKey()
+  const saved = loadProgress(date)
+  const layoutSeed = saved?.layoutSeed ?? Math.floor(Math.random() * 2 ** 32)
+  return { saved, layoutSeed, puzzle: shufflePuzzle(generatePuzzle(date), mulberry32(layoutSeed)) }
+}
+
 export default function App() {
-  const [puzzle] = useState(() => shufflePuzzle(generatePuzzle(dateKey())))
+  const [{ saved, layoutSeed, puzzle }] = useState(loadGame)
   const [selected, setSelected] = useState<number[]>([])
-  const [found, setFound] = useState<number[]>([]) // indices into puzzle.solutionSets
-  const [misses, setMisses] = useState(0)
-  const [solveTime, setSolveTime] = useState<number | null>(null) // ms, once solved
+  const [found, setFound] = useState(saved?.found ?? [])
+  const [misses, setMisses] = useState(saved?.misses ?? 0)
+  const [solveTime, setSolveTime] = useState(saved?.solveTime ?? null)
   const board = useRef<HTMLDivElement>(null)
-  const startTime = useRef(0)
+  const startedAt = useRef(saved?.startedAt ?? 0)
 
   useEffect(() => {
-    startTime.current = performance.now()
-  }, [])
+    // The timer starts on the first render of the day's puzzle and survives reloads.
+    startedAt.current ||= performance.timeOrigin + performance.now()
+    saveProgress({
+      date: puzzle.date,
+      layoutSeed,
+      startedAt: startedAt.current,
+      found,
+      misses,
+      solveTime,
+    })
+  }, [puzzle.date, layoutSeed, found, misses, solveTime])
 
-  const foundCards = new Set(found.flatMap((s) => puzzle.solutionSets[s]))
+  const foundCards = new Set(found)
 
   function toggle(i: number, event: MouseEvent<HTMLElement>) {
     if (selected.includes(i)) return setSelected(selected.filter((j) => j !== i))
@@ -77,10 +124,10 @@ export default function App() {
     // The puzzle's only Sets are its solutions, so matching one is the whole check.
     const match = puzzle.solutionSets.findIndex((set) => set.every((j) => next.includes(j)))
     if (match >= 0) {
-      setFound([...found, match])
-      if (found.length + 1 === puzzle.solutionSets.length) {
-        // Event timestamps share performance.now()'s clock.
-        setSolveTime(event.timeStamp - startTime.current)
+      setFound([...found, ...next.map((j) => cardToIndex(puzzle.cards[j]))])
+      if (found.length + 3 === puzzle.cards.length) {
+        // Event timestamps share performance.now()'s clock, offset from timeOrigin.
+        setSolveTime(performance.timeOrigin + event.timeStamp - startedAt.current)
         const { left, top, width, height } = event.currentTarget.getBoundingClientRect()
         confetti({
           origin: {
@@ -115,7 +162,7 @@ export default function App() {
             type="button"
             className="card"
             aria-pressed={selected.includes(i)}
-            disabled={foundCards.has(i)}
+            disabled={foundCards.has(cardToIndex(card))}
             onClick={(e) => toggle(i, e)}
           >
             <CardFace card={card} />
@@ -125,7 +172,7 @@ export default function App() {
 
       <p className="status" aria-live="polite">
         {solveTime === null ? (
-          `${found.length} of ${puzzle.solutionSets.length} Sets found`
+          `${found.length / 3} of ${puzzle.solutionSets.length} Sets found`
         ) : (
           <>
             <strong className="time">{formatTime(solveTime)}</strong>

@@ -10,6 +10,7 @@ import {
   generatePuzzle,
   indexToCard,
   isSet,
+  mulberry32,
   shufflePuzzle,
   thirdCard,
 } from '../src/puzzle/index.ts'
@@ -96,9 +97,9 @@ describe('shufflePuzzle', () => {
     assert.deepEqual(solutionCards(shown), solutionCards(puzzle))
   })
 
-  test('actually reorders cards', () => {
-    const orders = new Set(Array.from({ length: 10 }, () => shufflePuzzle(puzzle).cards.map(cardToIndex).join()))
-    assert.ok(orders.size > 1)
+  test('is reproducible from a seed', () => {
+    assert.deepEqual(shufflePuzzle(puzzle, mulberry32(1)), shufflePuzzle(puzzle, mulberry32(1)))
+    assert.notDeepEqual(shufflePuzzle(puzzle, mulberry32(1)).cards, shufflePuzzle(puzzle, mulberry32(2)).cards)
   })
 })
 

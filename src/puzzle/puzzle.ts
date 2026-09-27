@@ -44,7 +44,7 @@ export function dateKey(date: Date = new Date()): string {
 export function generatePuzzle(date: string): Puzzle {
   if (!DATE_KEY.test(date)) throw new Error(`expected a YYYY-MM-DD date, got "${date}"`)
 
-  const rng = mulberry32(Number(date.replaceAll('-', '')))
+  const rng = mulberry32(dateSeed(date))
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const lines = randomDisjointLines(rng, SETS_PER_PUZZLE)
     const puzzle = fromLines(date, lines)
@@ -90,8 +90,11 @@ function fromLines(date: string, lines: number[][]): Puzzle {
   }
 }
 
+/** 2026-09-27 → 20260927 */
+const dateSeed = (date: string) => Number(date.replaceAll('-', ''))
+
 /** Seeded PRNG returning floats in [0, 1). */
-function mulberry32(seed: number): () => number {
+export function mulberry32(seed: number): () => number {
   return () => {
     seed = (seed + 0x6d2b79f5) | 0
     let t = Math.imul(seed ^ (seed >>> 15), seed | 1)
@@ -103,6 +106,7 @@ function mulberry32(seed: number): () => number {
 /**
  * Returns a copy of the puzzle with its cards permuted for display and
  * `solutionSets` remapped to the new positions. The underlying puzzle is unchanged.
+ * Pass a seeded `random` (e.g. `mulberry32(seed)`) for a reproducible layout.
  */
 export function shufflePuzzle(puzzle: Puzzle, random: () => number = Math.random): Puzzle {
   const order = puzzle.cards.map((_, i) => i)
