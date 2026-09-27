@@ -1,0 +1,28 @@
+:root {
+  --text: #1c1b22;
+  --muted: #6b6375;
+  --bg: #f4f3ef;
+  --accent: #6a3d9a;
+  --red: #d62828;
+  --green: #1f9d3a;
+  --purple: #6a3d9a;
+
+  font: 16px/1.4 system-ui, 'Segoe UI', Roboto, sans-serif;
+  color-scheme: light dark;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #f3f4f6;
+    --muted: #9ca3af;
+    --bg: #16171d;
+    --accent: #c084fc;
+  }
+}
+
+body {
+  margin: 0;
+}

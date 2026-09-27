@@ -1,0 +1,73 @@
+main {
+  max-width: 440px;
+  margin: 0 auto;
+  padding: 24px 16px;
+  text-align: center;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 1.75rem;
+}
+
+header p,
+.status {
+  color: var(--muted);
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.card {
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  cursor: pointer;
+  transition: transform 120ms, opacity 200ms;
+}
+
+.card[aria-pressed='true'] {
+  transform: translateY(-4px);
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.card:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.card:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.card-face {
+  position: relative;
+  display: block;
+  isolation: isolate;
+}
+
+.card-face img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* See CardFace in App.tsx. */
+.card-face::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: var(--tint);
+  mix-blend-mode: lighten;
+  mask: var(--src) center / 100% 100% no-repeat;
+}
+
+.card-face[data-color='red'] { --tint: var(--red); }
+.card-face[data-color='green'] { --tint: var(--green); }
+.card-face[data-color='purple'] { --tint: var(--purple); }
