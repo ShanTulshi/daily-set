@@ -55,6 +55,13 @@ function formatTime(elapsed: number): string {
   return `${minutes}:${seconds.padStart(6, '0')}`
 }
 
+const missCount = (misses: number) => `${misses} ${misses === 1 ? 'miss' : 'misses'}`
+
+function shareText(solveTime: number, misses: number): string {
+  const result = misses === 0 ? ' 💎 flawless' : `, ${missCount(misses)}`
+  return `My Set puzzle time is ${formatTime(solveTime)}${result} — set.shan.wtf`
+}
+
 /** Today's progress. Only the latest date is kept, so old days don't accumulate. */
 interface Progress {
   date: string
@@ -99,6 +106,8 @@ export default function App() {
   const [solveTime, setSolveTime] = useState(saved?.solveTime ?? null)
   const board = useRef<HTMLDivElement>(null)
   const startedAt = useRef(saved?.startedAt ?? 0)
+  const [shareStatus, setShareStatus] = useState<string | null>(null) // e.g. "Copied!"
+  const shareStatusTimer = useRef(0)
 
   useEffect(() => {
     // The timer starts on the first render of the day's puzzle and survives reloads.
@@ -148,6 +157,27 @@ export default function App() {
     )
   }
 
+  async function share(solveTime: number) {
+    const text = shareText(solveTime, misses)
+    // Desktop browsers increasingly support Web Share too; keep the share sheet for
+    // touch devices and copy everywhere else.
+    if (navigator.share && matchMedia('(pointer: coarse)').matches) {
+      try {
+        return await navigator.share({ text })
+      } catch (error) {
+        if ((error as Error).name === 'AbortError') return // the player closed the sheet
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(text)
+      setShareStatus('Copied!')
+    } catch {
+      setShareStatus("Couldn't copy")
+    }
+    clearTimeout(shareStatusTimer.current)
+    shareStatusTimer.current = setTimeout(() => setShareStatus(null), 2000)
+  }
+
   return (
     <main>
       <header>
@@ -168,17 +198,26 @@ export default function App() {
             <CardFace card={card} />
           </button>
         ))}
+
+        {solveTime !== null && (
+          <div className="result">
+            <section className="result-card" aria-label="Final score">
+              <p className="result-label">Solved!</p>
+              <strong className="time">{formatTime(solveTime)}</strong>
+              <p>{misses === 0 ? '💎 Flawless' : missCount(misses)}</p>
+              <button type="button" className="share" onClick={() => share(solveTime)} autoFocus>
+                Share
+              </button>
+              <p className="share-status" aria-live="polite">
+                {shareStatus}
+              </p>
+            </section>
+          </div>
+        )}
       </div>
 
       <p className="status" aria-live="polite">
-        {solveTime === null ? (
-          `${found.length / 3} of ${puzzle.solutionSets.length} Sets found`
-        ) : (
-          <>
-            <strong className="time">{formatTime(solveTime)}</strong>
-            Solved with {misses} {misses === 1 ? 'miss' : 'misses'}!
-          </>
-        )}
+        {found.length / 3} of {puzzle.solutionSets.length} Sets found
       </p>
 
       <details className="help">
