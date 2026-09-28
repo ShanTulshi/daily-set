@@ -59,7 +59,7 @@ const missCount = (misses: number) => `${misses} ${misses === 1 ? 'miss' : 'miss
 
 function shareText(solveTime: number, misses: number): string {
   const result = misses === 0 ? ' 💎 flawless' : `, ${missCount(misses)}`
-  return `My Set puzzle time is ${formatTime(solveTime)}${result} — set.shan.wtf`
+  return `My Set puzzle time is ${formatTime(solveTime)}${result} — https://set.shan.wtf`
 }
 
 /** Today's progress. Only the latest date is kept, so old days don't accumulate. */
