@@ -12,6 +12,8 @@ import {
   mulberry32,
   shufflePuzzle,
 } from './puzzle/index.ts'
+import { formatTime, loadHistory, missCount, saveHistory } from './results.ts'
+import Stats from './Stats.tsx'
 import './App.css'
 
 const images = import.meta.glob<string>('../static/set_cards_individual/*.svg', {
@@ -47,15 +49,6 @@ function CardFace({ card }: { card: Card }) {
     </span>
   )
 }
-
-function formatTime(elapsed: number): string {
-  const ms = Math.floor(elapsed) // flooring keeps 59999.6 from rounding up to "0:60.000"
-  const minutes = Math.floor(ms / 60_000)
-  const seconds = ((ms % 60_000) / 1000).toFixed(3)
-  return `${minutes}:${seconds.padStart(6, '0')}`
-}
-
-const missCount = (misses: number) => `${misses} ${misses === 1 ? 'miss' : 'misses'}`
 
 function shareText(solveTime: number, misses: number): string {
   const result = misses === 0 ? ' 💎 flawless' : `, ${missCount(misses)}`
@@ -95,11 +88,16 @@ function loadGame() {
   const date = dateKey()
   const saved = loadProgress(date)
   const layoutSeed = saved?.layoutSeed ?? Math.floor(Math.random() * 2 ** 32)
-  return { saved, layoutSeed, puzzle: shufflePuzzle(generatePuzzle(date), mulberry32(layoutSeed)) }
+  const history = loadHistory()
+  // Today may have been solved before stats existed.
+  if (saved?.solveTime != null) history[date] ??= { time: saved.solveTime, misses: saved.misses }
+  const puzzle = shufflePuzzle(generatePuzzle(date), mulberry32(layoutSeed))
+  return { saved, layoutSeed, history, puzzle }
 }
 
 export default function App() {
-  const [{ saved, layoutSeed, puzzle }] = useState(loadGame)
+  const [{ saved, layoutSeed, history: initialHistory, puzzle }] = useState(loadGame)
+  const [history, setHistory] = useState(initialHistory)
   const [selected, setSelected] = useState<number[]>([])
   const [found, setFound] = useState(saved?.found ?? [])
   const [misses, setMisses] = useState(saved?.misses ?? 0)
@@ -122,6 +120,8 @@ export default function App() {
     })
   }, [puzzle.date, layoutSeed, found, misses, solveTime])
 
+  useEffect(() => saveHistory(history), [history])
+
   const foundCards = new Set(found)
 
   function toggle(i: number, event: MouseEvent<HTMLElement>) {
@@ -136,7 +136,9 @@ export default function App() {
       setFound([...found, ...next.map((j) => cardToIndex(puzzle.cards[j]))])
       if (found.length + 3 === puzzle.cards.length) {
         // Event timestamps share performance.now()'s clock, offset from timeOrigin.
-        setSolveTime(performance.timeOrigin + event.timeStamp - startedAt.current)
+        const time = performance.timeOrigin + event.timeStamp - startedAt.current
+        setSolveTime(time)
+        setHistory({ ...history, [puzzle.date]: { time, misses } })
         const { left, top, width, height } = event.currentTarget.getBoundingClientRect()
         confetti({
           origin: {
@@ -220,22 +222,25 @@ export default function App() {
         {found.length / 3} of {puzzle.solutionSets.length} Sets found
       </p>
 
-      <details className="help">
-        <summary>Help</summary>
-        <p>
-          Every card has four features: number, shape, shading and color. Three cards form a
-          Set when each feature is either the same on all three cards or different on all three.
-        </p>
-        <p>
-          These 12 cards hold exactly four Sets, and each card belongs to exactly one of them.
-          Tap three cards to guess a Set. Find all four to finish.
-        </p>
-        <p>
-          <a href="https://en.wikipedia.org/wiki/Set_(card_game)" target="_blank" rel="noreferrer">
-            Learn more about Set on Wikipedia
-          </a>
-        </p>
-      </details>
+      <div className="extras">
+        <details className="help">
+          <summary>Help</summary>
+          <p>
+            Every card has four features: number, shape, shading and color. Three cards form a
+            Set when each feature is either the same on all three cards or different on all three.
+          </p>
+          <p>
+            These 12 cards hold exactly four Sets, and each card belongs to exactly one of them.
+            Tap three cards to guess a Set. Find all four to finish.
+          </p>
+          <p>
+            <a href="https://en.wikipedia.org/wiki/Set_(card_game)" target="_blank" rel="noreferrer">
+              Learn more about Set on Wikipedia
+            </a>
+          </p>
+        </details>
+        <Stats history={history} today={puzzle.date} />
+      </div>
     </main>
   )
 }

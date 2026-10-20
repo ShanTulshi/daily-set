@@ -162,8 +162,15 @@ header p,
   }
 }
 
-.help {
+.extras {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
   margin-top: 24px;
+}
+
+.help {
+  flex: 1;
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--surface);
@@ -216,4 +223,238 @@ header p,
 
 .help a {
   color: var(--accent);
+}
+
+.stats-button {
+  padding: 12px 20px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.stats-button:focus-visible,
+.stats .close:focus-visible,
+.slot:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Stats dialog */
+.stats {
+  width: min(400px, calc(100vw - 32px));
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.stats::backdrop {
+  background: rgb(0 0 0 / 0.4);
+}
+
+.stats-content {
+  padding: 16px 20px 20px;
+}
+
+.stats header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.stats h2 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.stats .close {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--muted);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.stats .empty {
+  color: var(--muted);
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 16px 0 20px;
+}
+
+.summary div {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: var(--bg);
+}
+
+.summary dt {
+  font-size: 0.8125rem;
+  color: var(--muted);
+}
+
+.summary dd {
+  margin: 2px 0 0;
+  font-size: 1.375rem;
+  font-weight: 600;
+}
+
+/* Histogram: one column per 10-second bucket. */
+.histogram {
+  margin: 0;
+}
+
+.histogram figcaption {
+  margin-bottom: 24px;
+  font-weight: 600;
+}
+
+.plot {
+  position: relative;
+  display: flex;
+  height: 120px;
+  margin-left: 20px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--muted);
+}
+
+/* The top gridline is the tallest bucket's count; the baseline is zero. */
+.plot::before {
+  content: attr(data-max);
+  position: absolute;
+  top: -0.7em;
+  right: calc(100% + 6px);
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.slot {
+  position: relative;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  border-radius: 4px;
+  cursor: default;
+}
+
+.bar {
+  position: absolute;
+  bottom: 0;
+  width: min(24px, calc(100% - 4px));
+  height: calc(var(--h) * 100%);
+  border-radius: 4px 4px 0 0;
+  background: var(--bar);
+}
+
+.slot[data-today] .bar {
+  background: var(--bar-today);
+}
+
+.slot:hover .bar,
+.slot:focus-visible .bar {
+  filter: brightness(1.15);
+}
+
+.cap {
+  position: absolute;
+  bottom: calc(var(--h) * 100% + 4px);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.tip {
+  position: absolute;
+  bottom: calc(var(--h) * 100% + 8px);
+  z-index: 1;
+  display: none;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  box-shadow: 0 4px 12px rgb(0 0 0 / 0.15);
+  color: var(--muted);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+}
+
+/* Keep edge tooltips inside the dialog. */
+.slot:nth-child(-n + 2) .tip {
+  left: 0;
+}
+
+.slot:nth-last-child(-n + 2) .tip {
+  right: 0;
+}
+
+.tip strong {
+  color: var(--text);
+}
+
+.slot:hover .tip,
+.slot:focus-visible .tip {
+  display: block;
+}
+
+.x-labels {
+  display: flex;
+  margin-left: 20px;
+  padding-top: 4px;
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+
+.x-labels span {
+  flex: 1;
+  text-align: center;
+}
+
+.x-title {
+  margin: 2px 0 0 20px;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+
+.table-view {
+  margin-top: 16px;
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.table-view summary {
+  cursor: pointer;
+}
+
+.table-view table {
+  width: 100%;
+  margin-top: 8px;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.table-view th,
+.table-view td {
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+
+.table-view th:last-child,
+.table-view td:last-child {
+  text-align: right;
 }

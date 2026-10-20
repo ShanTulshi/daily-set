@@ -19,7 +19,7 @@ The generator (`src/puzzle/`) is plain TypeScript with no UI dependencies:
 
 The puzzle itself is fixed per date. The on-screen card order is shuffled separately from a per-player seed, so layouts differ between players but stay the same across reloads.
 
-Progress (found Sets, misses, start and solve time, layout seed) is kept in `localStorage` for the current day only. That stops casual retries, but it isn't tamper-proof.
+Progress (found Sets, misses, start and solve time, layout seed) is kept in `localStorage` for the current day only. That stops casual retries, but it isn't tamper-proof. Every solve is also added to a separate history, which the Stats dialog summarizes with a histogram of solve times in 10-second buckets.
 
 > Changing the generator changes the puzzle for every date, past and future.
 
@@ -37,7 +37,8 @@ npm run build   # type-check and build to dist/
 |---|---|
 | `src/puzzle/card.ts` | Card representation, Set check, Set completion, `findSets` |
 | `src/puzzle/puzzle.ts` | Daily generator, validation, display shuffle, PRNG |
-| `src/App.tsx` | Game UI, timer, saved progress |
+| `src/App.tsx` | Game UI, timer, saved progress, sharing |
+| `src/Stats.tsx`, `src/results.ts` | Stats dialog and histogram; solve history and time formatting |
 | `static/set_cards_individual/` | Black-and-white card SVGs, tinted by color in CSS |
 | `scripts/draw-cards.ts` | Draws those SVGs: `node scripts/draw-cards.ts` |
 | `tests/` | Generator tests |
