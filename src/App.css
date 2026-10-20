@@ -163,14 +163,14 @@ header p,
 }
 
 .extras {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
   gap: 10px;
   align-items: flex-start;
   margin-top: 24px;
 }
 
 .help {
-  flex: 1;
   border: 1px solid var(--border);
   border-radius: 10px;
   background: var(--surface);
